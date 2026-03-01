@@ -1,327 +1,532 @@
-var buttonNext = document.getElementById("btnNext");
-var buttonPrev = document.getElementById('btnPrev');
-var buttonSkip = document.getElementById("btnskip");
+/* ============================================
+   QuizMaster — Main Logic
+   ============================================ */
 
-console.log(buttonPrev);
-const quiz=[{
-    swal:"UET Peshawar Located in ?",
-    a:"Peshawar",
-    b:"Quetta",
-    c:"Mardan",
-    d:"Kohat"
-},{
-    swal:"Current version of JavaScript is ?",
-    a:"ECMA5",
-    b:"ECMA4",
-    c:"ECMA6",
-    d:"ECMA1 "
-},{
-    swal:"The constant PI value is ?",
-    a:"3.14",
-    b:"3.56",
-    c:"4.99",
-    d:"2.56"
-},{
-    swal:"Father of C++ is ?",
-    a:"Denis Ritchi",
-    b:"Bjarne strastroup",
-    c:"Donal trump",
-    d:"Bill Gate"
-},{
-    swal:"There are --------- days in a year?",
-    a:"356",
-    b:"310",
-    c:"365",
-    d:"320"
-},{
-    swal:"4x4+3-1 = ?",
-    a:"28",
-    b:"24",
-    c:"21",
-    d:"18"
-},{
-    swal:"There are ----- agencies in FATA ?",
-    a:"8",
-    b:"5",
-    c:"7",
-    d:"6"
-},{
-    swal:"Most famous language is ?",
-    a:"Visual Basic",
-    b:"JavaScript",
-    c:"Python",
-    d:"C++"
-},{
-    swal:"There are ------- players in Cricket ?",
-    a:"10",
-    b:"9",
-    c:"11",
-    d:"12"
-},{
-    swal:"Bootsrat is easier than Css ?",
-    a:"Yes",
-    b:"No",
-    c:"Non",
-    d:"Materlize CSS"
-},{
-    swal:"Hazrat Muhammad(P.B.U.H) was the ----- Prophet ?",
-    a:"First",
-    b:"Last",
-    c:"Both the Above",
-    d:"Middle"
-},{
-    swal:"Pakistan independence day is celebrated on ?",
-    a:"14-august-1947",
-    b:"18-may-1947",
-    c:"12-august-1947",
-    d:"14-july-1947"
-}];
-var x =[45,67,89,45,234,456789,90];
-console .log(Math.max(...x));
-var totalScore = 0;
-var arrayIndex = 0;
-var questionsMcqNo = 0;
-var formclosed = false;
-buttonPrev.style.visibility = "hidden";
-var mcqNo = document.getElementById('qNo');
-var inputRadA= document.getElementById("radioA");
-var inputRadB = document.getElementById("radioB");
-var inputRadC= document.getElementById("radioC");
-var inputRadD = document.getElementById("radioD");
-var questions = document.getElementById("qeury");
-var choiceA = document.getElementById('choiceA');
-var choiceB = document.getElementById('choiceB');
-var choiceC = document.getElementById('choiceC');
-var choiceD = document.getElementById('choiceD');
-
-    
-   
-
-function print(){
-    var currentIndex = quiz[arrayIndex];
-    mcqNo.innerHTML = questionsMcqNo+1;
-    if(arrayIndex==quiz.length){
-        mcqNo.innerHTML=quiz.length;
-        return false;
+// ─── Quiz Data with correct answers ───
+const quizData = [
+    {
+        question: "UET Peshawar is located in?",
+        a: "Peshawar",
+        b: "Quetta",
+        c: "Mardan",
+        d: "Kohat",
+        correct: "a"
+    },
+    {
+        question: "Current version of JavaScript is?",
+        a: "ECMA5",
+        b: "ECMA4",
+        c: "ECMA6",
+        d: "ECMA1",
+        correct: "c"
+    },
+    {
+        question: "The constant PI value is?",
+        a: "3.14",
+        b: "3.56",
+        c: "4.99",
+        d: "2.56",
+        correct: "a"
+    },
+    {
+        question: "Father of C++ is?",
+        a: "Denis Ritchie",
+        b: "Bjarne Stroustrup",
+        c: "Donald Trump",
+        d: "Bill Gates",
+        correct: "b"
+    },
+    {
+        question: "There are _____ days in a year?",
+        a: "356",
+        b: "310",
+        c: "365",
+        d: "320",
+        correct: "c"
+    },
+    {
+        question: "4 × 4 + 3 − 1 = ?",
+        a: "28",
+        b: "24",
+        c: "21",
+        d: "18",
+        correct: "d"
+    },
+    {
+        question: "There are _____ agencies in FATA?",
+        a: "8",
+        b: "5",
+        c: "7",
+        d: "6",
+        correct: "c"
+    },
+    {
+        question: "Most popular programming language is?",
+        a: "Visual Basic",
+        b: "JavaScript",
+        c: "Python",
+        d: "C++",
+        correct: "b"
+    },
+    {
+        question: "There are _____ players in a Cricket team?",
+        a: "10",
+        b: "9",
+        c: "11",
+        d: "12",
+        correct: "c"
+    },
+    {
+        question: "Bootstrap is a framework for?",
+        a: "CSS",
+        b: "JavaScript",
+        c: "Python",
+        d: "C++",
+        correct: "a"
+    },
+    {
+        question: "Hazrat Muhammad (P.B.U.H) was the _____ Prophet?",
+        a: "First",
+        b: "Last",
+        c: "Both of the above",
+        d: "Middle",
+        correct: "b"
+    },
+    {
+        question: "Pakistan Independence Day is celebrated on?",
+        a: "14 August 1947",
+        b: "18 May 1947",
+        c: "12 August 1947",
+        d: "14 July 1947",
+        correct: "a"
     }
-    questions.innerHTML = currentIndex.swal;
-    choiceA.innerHTML= currentIndex.a;
-    choiceB.innerHTML=currentIndex.b;
-    choiceC.innerHTML= currentIndex.c;
-    choiceD.innerHTML = currentIndex.d;
+];
+
+// ─── State Variables ───
+let currentIndex = 0;
+let userAnswers = new Array(quizData.length).fill(null); // stores user's selected answer per question
+let skippedQuestions = [];      // indices of skipped questions
+let skippedIndex = 0;           // current index within skippedQuestions array
+let skippedAnswers = {};        // answers given during skipped review
+let timerInterval = null;
+let totalSeconds = 5 * 60;     // 5 minutes
+let quizStartTime = null;
+let quizFinished = false;
+
+// ─── DOM Elements ───
+const screens = {
+    start: document.getElementById('startScreen'),
+    quiz: document.getElementById('quizScreen'),
+    skipped: document.getElementById('skippedScreen'),
+    result: document.getElementById('resultScreen')
+};
+
+// Quiz screen elements
+const el = {
+    timerText: document.getElementById('timerText'),
+    timer: document.getElementById('timer'),
+    currentQ: document.getElementById('currentQ'),
+    totalQ: document.getElementById('totalQ'),
+    progressBar: document.getElementById('progressBar'),
+    questionText: document.getElementById('questionText'),
+    textA: document.getElementById('textA'),
+    textB: document.getElementById('textB'),
+    textC: document.getElementById('textC'),
+    textD: document.getElementById('textD'),
+    btnPrev: document.getElementById('btnPrev'),
+    btnNext: document.getElementById('btnNext'),
+    btnSkip: document.getElementById('btnSkip'),
+    skipCounter: document.getElementById('skipCounter'),
+    radios: document.querySelectorAll('input[name="answer"]')
+};
+
+// Skipped screen elements
+const sk = {
+    timerText: document.getElementById('timerTextSkipped'),
+    timer: document.getElementById('timerSkipped'),
+    progressBar: document.getElementById('progressBarSkipped'),
+    questionText: document.getElementById('skippedQuestionText'),
+    textA: document.getElementById('skippedTextA'),
+    textB: document.getElementById('skippedTextB'),
+    textC: document.getElementById('skippedTextC'),
+    textD: document.getElementById('skippedTextD'),
+    btnPrev: document.getElementById('btnSkippedPrev'),
+    btnNext: document.getElementById('btnSkippedNext'),
+    btnSkip: document.getElementById('btnSkipAgain'),
+    info: document.getElementById('skippedInfo'),
+    radios: document.querySelectorAll('input[name="skippedAnswer"]')
+};
+
+// ─── Screen Navigation ───
+function showScreen(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
 }
 
+// ─── Timer ───
+function startTimer() {
+    quizStartTime = Date.now();
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        totalSeconds--;
+        updateTimerDisplay();
 
-var mcqItterations=0;
-if(arrayIndex==0){
-    print();
+        if (totalSeconds <= 60) {
+            el.timer.classList.add('warning');
+            if (screens.skipped.classList.contains('active')) {
+                sk.timer.classList.add('warning');
+            }
+        }
+
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+        }
+    }, 1000);
 }
 
+function updateTimerDisplay() {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    const display = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    el.timerText.textContent = display;
+    sk.timerText.textContent = display;
+}
 
+function getTimeTaken() {
+    if (!quizStartTime) return '0:00';
+    const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+}
 
+// ─── Render Quiz Question ───
+function renderQuestion() {
+    const q = quizData[currentIndex];
+    el.currentQ.textContent = currentIndex + 1;
+    el.totalQ.textContent = quizData.length;
+    el.progressBar.style.width = `${((currentIndex + 1) / quizData.length) * 100}%`;
+    el.questionText.textContent = q.question;
+    el.textA.textContent = q.a;
+    el.textB.textContent = q.b;
+    el.textC.textContent = q.c;
+    el.textD.textContent = q.d;
 
-
-buttonSkip.addEventListener('click',deleting); 
-
-buttonNext.addEventListener("click",function(){
-    
-    if((inputRadA.checked==true) || (inputRadB.checked==true) || (inputRadC.checked==true) || (inputRadD.checked==true)){
-        mcqItterations++;
-        arrayIndex++;
-        questionsMcqNo++;
-        
-        console.log("Current Itteration is : ", mcqItterations);
-        arrayIndex>0?buttonPrev.style.visibility="": buttonPrev.style.visibility="hidden";
-        
-        if(inputRadA.checked==true){
-            totalScore+=2;
-            console.log("The score after checked is , ", totalScore);
-            inputRadA.checked = false; 
-           
-        }else{
-            inputRadB.checked= true; 
-            inputRadC.checked= true;
-            inputRadD.checked=true;    
-        }
-
-        if(mcqItterations==2 && inputRadC.checked==true){
-            totalScore+=2;
-            inputRadC.checked= false;
-        }else{
-            inputRadD.checked=true; 
-            inputRadA.checked = true;
-             inputRadB.checked=true; 
-
-        }
-            if(mcqItterations==3 && inputRadA.checked==true){
-            totalScore+=2;
-            inputRadA.checked = false;  
-        }else{
-            inputRadB.checked=false; 
-            inputRadC.checked= false;inputRadD.checked=false;
-        }
-
-        if(mcqItterations==4 && inputRadB.checked==true){
-            totalScore+=2;
-            inputRadB.checked=false; 
-            
-        }else{
-            inputRadC.checked= false;inputRadD.checked=false;
-            inputRadA.checked = false;
-        }
-
-        if(mcqItterations==5 && inputRadC.checked==true){
-            totalScore+=2;
-          
-            inputRadC.checked= false;
-        }else{
-            inputRadA.checked = false; inputRadB.checked=false; 
-            inputRadD.checked=false;
-        }
-
-        if(mcqItterations==6 && inputRadD.checked==true){
-            totalScore+=2;
-            inputRadD.checked=false;
-        }else{
-            inputRadA.checked = false; inputRadB.checked=false;
-            inputRadC.checked= false;
-        }
-
-        if(mcqItterations==7 && inputRadA.checked==true){
-            totalScore+=2;
-            inputRadA.checked = false;
-        }else{
-            inputRadB.checked=false; 
-            inputRadC.checked= false;inputRadD.checked=false;
-        }
-
-        if(mcqItterations==8 && inputRadC.checked==true){
-            totalScore+=2;
-            
-            inputRadC.checked= false;
-        }else{
-            inputRadA.checked = false; inputRadB.checked=false; 
-            inputRadD.checked=false; 
-        } 
-        if(mcqItterations==9 && inputRadA.checked==true){
-            totalScore+=2;
-            inputRadA.checked = false;
-        }else{
-            inputRadB.checked=false; 
-            inputRadC.checked= false;inputRadD.checked=false;
-        } 
-        if(mcqItterations==10 && inputRadC.checked==true){
-            totalScore+=2;
-           
-            inputRadC.checked= false;
-        }else{
-            inputRadA.checked = false; inputRadB.checked=false; 
-            inputRadD.checked=false; 
-        } 
-        if(mcqItterations==11 && inputRadA.checked==true){
-            totalScore+=2;
-            inputRadA.checked = false;
-        }else {
-            inputRadB.checked=false; 
-            inputRadC.checked= false;inputRadD.checked=false; 
-
-        }
-        if(mcqItterations==12 && inputRadC.checked==true){
-            totalScore+=2;
-            
-            inputRadC.checked= false;
-        }else{
-            inputRadA.checked = false; inputRadB.checked=false;
-            inputRadD.checked=false;
-        }
-        console.log("You got : ",totalScore);
-       
-        console.log("THe are some itteration of mcqs",mcqItterations);
-
-    }else{
-        alert("please select one of them");
+    // Restore previously selected answer
+    el.radios.forEach(r => r.checked = false);
+    if (userAnswers[currentIndex]) {
+        const radio = document.querySelector(`input[name="answer"][value="${userAnswers[currentIndex]}"]`);
+        if (radio) radio.checked = true;
     }
-    
-    if(arrayIndex<quiz.length){
-       print();
-    }else{
-         formclosed = true;
-        alert("You have completed the Quiz");
-        buttonNext.style.visibility ='hidden';
-        buttonPrev.style.visibility = 'hidden';
-        buttonSkip.style.visibility = "hidden";
-        console.log("the obt marks is ", totalScore);
-        return false;
+
+    // Button states
+    el.btnPrev.disabled = currentIndex === 0;
+
+    // Change "Next" to "Submit" on last question
+    if (currentIndex === quizData.length - 1) {
+        el.btnNext.textContent = 'Submit ✓';
+    } else {
+        el.btnNext.textContent = 'Next →';
+    }
+
+    // Update skip counter
+    updateSkipCounter();
+}
+
+function updateSkipCounter() {
+    const skippedCount = userAnswers.filter((a, i) => a === null && i <= currentIndex).length + 
+                         skippedQuestions.filter(i => i > currentIndex).length;
+    // Show total skipped so far
+    const totalSkipped = skippedQuestions.length;
+    if (totalSkipped > 0) {
+        el.skipCounter.textContent = `${totalSkipped} question${totalSkipped > 1 ? 's' : ''} skipped`;
+    } else {
+        el.skipCounter.textContent = '';
+    }
+}
+
+// ─── Save Current Answer ───
+function saveCurrentAnswer() {
+    const selected = document.querySelector('input[name="answer"]:checked');
+    if (selected) {
+        userAnswers[currentIndex] = selected.value;
+    }
+}
+
+// ─── Quiz Event Handlers ───
+
+// Start Button
+document.getElementById('btnStart').addEventListener('click', () => {
+    showScreen('quiz');
+    renderQuestion();
+    startTimer();
+});
+
+// Next Button
+el.btnNext.addEventListener('click', () => {
+    const selected = document.querySelector('input[name="answer"]:checked');
+
+    if (!selected && !skippedQuestions.includes(currentIndex)) {
+        // No answer selected and not previously skipped — warn user
+        shakeButton(el.btnNext);
+        el.skipCounter.textContent = '⚠ Please select an answer or click Skip';
+        el.skipCounter.style.color = '#e74c3c';
+        setTimeout(() => {
+            el.skipCounter.style.color = '#999';
+            updateSkipCounter();
+        }, 2000);
+        return;
+    }
+
+    saveCurrentAnswer();
+
+    if (currentIndex < quizData.length - 1) {
+        currentIndex++;
+        renderQuestion();
+    } else {
+        // Last question — check for skipped questions
+        handleQuizEnd();
     }
 });
 
-buttonPrev.addEventListener('click',function(){    
-        arrayIndex--;
-        mcqItterations--;
-        questionsMcqNo--;
-    if(arrayIndex==0){
-        buttonPrev.style.visibility="hidden";
+// Previous Button
+el.btnPrev.addEventListener('click', () => {
+    saveCurrentAnswer();
+    if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
     }
-    print();
-})
+});
 
+// Skip Button
+el.btnSkip.addEventListener('click', () => {
+    // Mark as skipped (don't save any answer)
+    userAnswers[currentIndex] = null;
+    if (!skippedQuestions.includes(currentIndex)) {
+        skippedQuestions.push(currentIndex);
+    }
 
+    if (currentIndex < quizData.length - 1) {
+        currentIndex++;
+        renderQuestion();
+    } else {
+        handleQuizEnd();
+    }
+});
 
+// ─── Handle Quiz End (check for skipped) ───
+function handleQuizEnd() {
+    // Find all unanswered questions
+    const unanswered = [];
+    for (let i = 0; i < quizData.length; i++) {
+        if (userAnswers[i] === null) {
+            unanswered.push(i);
+        }
+    }
 
-
-function deleting(){
-    questionsMcqNo++;
-    mcqItterations++;
-    var arraykhan = [];
-    arraykhan[arrayIndex]= quiz.push[arrayIndex];
-    quiz.splice(`0`,arrayIndex+1);
-    print();
-    console.log("THe elements in array Khan",arraykhan);
-    console.log("THe remaining array is , ", quiz);
-    var saveDeleted = quiz.slice(arrayIndex,arrayIndex+1);
-    console.log("The deleted element is ",saveDeleted);
-    removeArray = saveDeleted.push(saveDeleted);
-    console.log("The elements after operations are , ", removeArray);
-    console.log("THe elements in array Khan",arraykhan);
-    // console.log("The push method is used  ",removeArray);
-     
+    if (unanswered.length > 0) {
+        // Show skipped questions screen
+        skippedQuestions = unanswered;
+        skippedIndex = 0;
+        skippedAnswers = {};
+        showScreen('skipped');
+        renderSkippedQuestion();
+    } else {
+        finishQuiz();
+    }
 }
 
+// ─── Skipped Questions Screen ───
+function renderSkippedQuestion() {
+    const qIdx = skippedQuestions[skippedIndex];
+    const q = quizData[qIdx];
 
+    sk.progressBar.style.width = `${((skippedIndex + 1) / skippedQuestions.length) * 100}%`;
+    sk.questionText.textContent = q.question;
+    sk.textA.textContent = q.a;
+    sk.textB.textContent = q.b;
+    sk.textC.textContent = q.c;
+    sk.textD.textContent = q.d;
 
+    // Clear selection
+    sk.radios.forEach(r => r.checked = false);
 
-
-
-
-
-
-
-
-
-
-var countPust = document.getElementById("count");
-var totalMinutes = 5;
-var totalSecond = totalMinutes*60;
-const statBtn = document.getElementById("btnStart");
-setInterval(updateTime,1000);
-function updateTime() { 
-    const time = Math.floor(totalSecond/60);
-    let seconds = totalSecond%60;
-    seconds=seconds<10?'0'+seconds:seconds;
-    countPust.innerHTML=`${time}:${seconds}`;
-    if(time==0 && seconds==0){
-        alert("test Ended !");
-        
-        window.close("index.html");
-        return false;
+    // Restore if already answered in this round
+    if (skippedAnswers[qIdx]) {
+        const radio = document.querySelector(`input[name="skippedAnswer"][value="${skippedAnswers[qIdx]}"]`);
+        if (radio) radio.checked = true;
     }
-    if(formclosed==true){
-        var finishtTime = time.toString();
 
-        countPust.innerHTML=finishtTime+":"+ `${seconds}`;
-        return false;
-    }else{
-        
+    sk.btnPrev.disabled = skippedIndex === 0;
+
+    if (skippedIndex === skippedQuestions.length - 1) {
+        sk.btnNext.textContent = 'Finish ✓';
+    } else {
+        sk.btnNext.textContent = 'Next →';
     }
-    totalSecond--;
+
+    sk.info.textContent = `Skipped question ${skippedIndex + 1} of ${skippedQuestions.length} (Question #${qIdx + 1})`;
 }
+
+// Skipped Next
+sk.btnNext.addEventListener('click', () => {
+    const selected = document.querySelector('input[name="skippedAnswer"]:checked');
+    const qIdx = skippedQuestions[skippedIndex];
+
+    if (selected) {
+        skippedAnswers[qIdx] = selected.value;
+    }
+
+    if (skippedIndex < skippedQuestions.length - 1) {
+        skippedIndex++;
+        renderSkippedQuestion();
+    } else {
+        // Merge skipped answers back
+        for (const [idx, ans] of Object.entries(skippedAnswers)) {
+            userAnswers[parseInt(idx)] = ans;
+        }
+        finishQuiz();
+    }
+});
+
+// Skipped Prev
+sk.btnPrev.addEventListener('click', () => {
+    const selected = document.querySelector('input[name="skippedAnswer"]:checked');
+    const qIdx = skippedQuestions[skippedIndex];
+    if (selected) {
+        skippedAnswers[qIdx] = selected.value;
+    }
+
+    if (skippedIndex > 0) {
+        skippedIndex--;
+        renderSkippedQuestion();
+    }
+});
+
+// Skipped Skip (skip again — leave unanswered)
+sk.btnSkip.addEventListener('click', () => {
+    if (skippedIndex < skippedQuestions.length - 1) {
+        skippedIndex++;
+        renderSkippedQuestion();
+    } else {
+        // Merge whatever was answered
+        for (const [idx, ans] of Object.entries(skippedAnswers)) {
+            userAnswers[parseInt(idx)] = ans;
+        }
+        finishQuiz();
+    }
+});
+
+// ─── Finish Quiz & Show Results ───
+function finishQuiz() {
+    if (quizFinished) return;
+    quizFinished = true;
+    clearInterval(timerInterval);
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+
+    for (let i = 0; i < quizData.length; i++) {
+        if (userAnswers[i] === null) {
+            unansweredCount++;
+        } else if (userAnswers[i] === quizData[i].correct) {
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    }
+
+    const totalMarks = correctCount * 2;
+    const maxMarks = quizData.length * 2;
+    const percentage = Math.round((totalMarks / maxMarks) * 100);
+    const timeTaken = getTimeTaken();
+
+    // Populate result screen
+    document.getElementById('scoreNumber').textContent = totalMarks;
+    document.getElementById('scoreTotal').textContent = `/ ${maxMarks}`;
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statWrong').textContent = wrongCount;
+    document.getElementById('statSkipped').textContent = unansweredCount;
+    document.getElementById('statTime').textContent = timeTaken;
+
+    // Dynamic result messages
+    let icon, title, subtitle, message;
+    if (percentage >= 80) {
+        icon = '🏆';
+        title = 'Excellent!';
+        subtitle = 'You\'re a genius!';
+        message = `Outstanding performance! You scored ${totalMarks} out of ${maxMarks} marks (${percentage}%). You really know your stuff! 🎉`;
+    } else if (percentage >= 60) {
+        icon = '🌟';
+        title = 'Great Job!';
+        subtitle = 'Well done!';
+        message = `Good performance! You scored ${totalMarks} out of ${maxMarks} marks (${percentage}%). Keep learning and you'll be at the top! 💪`;
+    } else if (percentage >= 40) {
+        icon = '📚';
+        title = 'Not Bad!';
+        subtitle = 'Room for improvement';
+        message = `You scored ${totalMarks} out of ${maxMarks} marks (${percentage}%). A little more study and you'll nail it next time! 📖`;
+    } else {
+        icon = '💡';
+        title = 'Keep Trying!';
+        subtitle = 'Practice makes perfect';
+        message = `You scored ${totalMarks} out of ${maxMarks} marks (${percentage}%). Don't give up — review the topics and try again! 🔥`;
+    }
+
+    document.getElementById('resultIcon').textContent = icon;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultSubtitle').textContent = subtitle;
+    document.getElementById('resultMessage').textContent = message;
+
+    // Color the score circle based on performance
+    const circle = document.getElementById('scoreCircle');
+    if (percentage >= 80) {
+        circle.style.background = 'linear-gradient(135deg, #00b09b, #96c93d)';
+    } else if (percentage >= 60) {
+        circle.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+    } else if (percentage >= 40) {
+        circle.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
+    } else {
+        circle.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+    }
+
+    showScreen('result');
+}
+
+// ─── Restart ───
+document.getElementById('btnRestart').addEventListener('click', () => {
+    // Reset everything
+    currentIndex = 0;
+    userAnswers = new Array(quizData.length).fill(null);
+    skippedQuestions = [];
+    skippedIndex = 0;
+    skippedAnswers = {};
+    totalSeconds = 5 * 60;
+    quizFinished = false;
+    quizStartTime = null;
+    el.timer.classList.remove('warning');
+    sk.timer.classList.remove('warning');
+
+    showScreen('start');
+});
+
+// ─── Utility: Shake animation for button ───
+function shakeButton(btn) {
+    btn.style.animation = 'shake 0.4s ease';
+    setTimeout(() => { btn.style.animation = ''; }, 400);
+}
+
+// Add shake keyframes dynamically
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+`;
+document.head.appendChild(shakeStyle);
