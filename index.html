@@ -1,41 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Quiz </title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>QuizMaster — Test Your Knowledge</title>
 </head>
 <body>
-    <div class="container">
-        <div style="display:flex">
-        <div id="count">5:00</div>
+
+    <!-- ========== START SCREEN ========== -->
+    <div id="startScreen" class="screen active">
+        <div class="start-card">
+            <div class="logo">🧠</div>
+            <h1>QuizMaster</h1>
+            <p class="tagline">Challenge yourself with 12 exciting questions!</p>
+            <div class="rules">
+                <h3>📋 Rules</h3>
+                <ul>
+                    <li>Each correct answer earns <strong>2 marks</strong></li>
+                    <li>You have <strong>5 minutes</strong> to finish</li>
+                    <li>You can <strong>skip</strong> questions and answer them later</li>
+                    <li>Navigate with <strong>Previous</strong> &amp; <strong>Next</strong></li>
+                </ul>
+            </div>
+            <button id="btnStart" class="btn btn-start">Start Quiz 🚀</button>
         </div>
-        <div class="header">
-       <h4 class="mcqNo">Question No : <span id="qNo">0</span> <span id="qeury">Quesitions</span> </h4>
     </div>
-        <ul>
-            <li>
-                <input type="radio" id="radioA" name="testData">
-                <label id="choiceA" for="radioA">a</label>
-            </li>
-            <li>
-                <input type="radio" id="radioB" name="testData">
-                <label id="choiceB" for="radioB">b</label>
-            </li>
-            <li>
-                <input type="radio" id="radioC" name="testData">
-                <label id="choiceC" for="radioC">c</label>
-            </li>
-            <li>
-                <input type="radio" id="radioD" name="testData">
-                <label id="choiceD" for="radioD">d</label>
-            </li>
-          </ul>
-            <div class="btnGroup">
-            <button type="" id="btnPrev">Previous</button>
-            <button id="btnskip">Skip</button>
-            <button type="button" id="btnNext">Next</button>
-      </div>
+
+    <!-- ========== QUIZ SCREEN ========== -->
+    <div id="quizScreen" class="screen">
+        <div class="quiz-card">
+            <!-- Top bar -->
+            <div class="top-bar">
+                <div class="timer" id="timer">
+                    <span class="timer-icon">⏱</span>
+                    <span id="timerText">05:00</span>
+                </div>
+                <div class="progress-info">
+                    Question <span id="currentQ">1</span> of <span id="totalQ">12</span>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <!-- Question -->
+            <div class="question-section">
+                <h2 id="questionText" class="question-text">Loading...</h2>
+            </div>
+
+            <!-- Options -->
+            <div class="options-section" id="optionsSection">
+                <label class="option">
+                    <input type="radio" name="answer" value="a">
+                    <span class="option-letter">A</span>
+                    <span class="option-text" id="textA"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="answer" value="b">
+                    <span class="option-letter">B</span>
+                    <span class="option-text" id="textB"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="answer" value="c">
+                    <span class="option-letter">C</span>
+                    <span class="option-text" id="textC"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="answer" value="d">
+                    <span class="option-letter">D</span>
+                    <span class="option-text" id="textD"></span>
+                </label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group">
+                <button id="btnPrev" class="btn btn-prev" disabled>← Previous</button>
+                <button id="btnSkip" class="btn btn-skip">Skip ⏭</button>
+                <button id="btnNext" class="btn btn-next">Next →</button>
+            </div>
+
+            <div class="skip-counter" id="skipCounter"></div>
+        </div>
     </div>
-   <script src="main.js"></script> 
+
+    <!-- ========== SKIPPED REVIEW SCREEN ========== -->
+    <div id="skippedScreen" class="screen">
+        <div class="quiz-card">
+            <div class="top-bar">
+                <div class="timer" id="timerSkipped">
+                    <span class="timer-icon">⏱</span>
+                    <span id="timerTextSkipped">00:00</span>
+                </div>
+                <div class="progress-info">
+                    <span class="skipped-badge">⚠ Skipped Questions</span>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBarSkipped"></div>
+            </div>
+
+            <div class="question-section">
+                <h2 id="skippedQuestionText" class="question-text">Loading...</h2>
+            </div>
+
+            <div class="options-section" id="skippedOptionsSection">
+                <label class="option">
+                    <input type="radio" name="skippedAnswer" value="a">
+                    <span class="option-letter">A</span>
+                    <span class="option-text" id="skippedTextA"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="skippedAnswer" value="b">
+                    <span class="option-letter">B</span>
+                    <span class="option-text" id="skippedTextB"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="skippedAnswer" value="c">
+                    <span class="option-letter">C</span>
+                    <span class="option-text" id="skippedTextC"></span>
+                </label>
+                <label class="option">
+                    <input type="radio" name="skippedAnswer" value="d">
+                    <span class="option-letter">D</span>
+                    <span class="option-text" id="skippedTextD"></span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button id="btnSkippedPrev" class="btn btn-prev" disabled>← Previous</button>
+                <button id="btnSkipAgain" class="btn btn-skip">Skip ⏭</button>
+                <button id="btnSkippedNext" class="btn btn-next">Next →</button>
+            </div>
+
+            <div class="skip-counter" id="skippedInfo"></div>
+        </div>
+    </div>
+
+    <!-- ========== RESULT SCREEN ========== -->
+    <div id="resultScreen" class="screen">
+        <div class="result-card">
+            <div class="result-icon" id="resultIcon">🏆</div>
+            <h1 id="resultTitle">Quiz Completed!</h1>
+            <p class="result-subtitle" id="resultSubtitle">Great effort!</p>
+
+            <div class="score-display">
+                <div class="score-circle" id="scoreCircle">
+                    <span class="score-number" id="scoreNumber">0</span>
+                    <span class="score-total" id="scoreTotal">/ 24</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box correct">
+                    <span class="stat-num" id="statCorrect">0</span>
+                    <span class="stat-label">Correct ✅</span>
+                </div>
+                <div class="stat-box wrong">
+                    <span class="stat-num" id="statWrong">0</span>
+                    <span class="stat-label">Wrong ❌</span>
+                </div>
+                <div class="stat-box skipped-stat">
+                    <span class="stat-num" id="statSkipped">0</span>
+                    <span class="stat-label">Unanswered ⏭</span>
+                </div>
+                <div class="stat-box time-stat">
+                    <span class="stat-num" id="statTime">0:00</span>
+                    <span class="stat-label">Time Taken ⏱</span>
+                </div>
+            </div>
+
+            <div class="result-message" id="resultMessage"></div>
+
+            <button id="btnRestart" class="btn btn-start">Try Again 🔄</button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
 </body>
 </html>
